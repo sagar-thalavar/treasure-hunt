@@ -28,17 +28,17 @@ begin
   );
   final_username := base_username;
 
-  while exists (select 1 from profiles where username = final_username) loop
+  while exists (select 1 from public.profiles where username = final_username) loop
     suffix := suffix + 1;
     final_username := base_username || suffix::text;
   end loop;
 
-  insert into profiles (id, username, avatar_url)
+  insert into public.profiles (id, username, avatar_url)
   values (new.id, final_username, new.raw_user_meta_data->>'avatar_url');
 
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- Trigger already points at this function (created in 001_initial_schema.sql)
 -- so no need to recreate it — replacing the function body is enough.
