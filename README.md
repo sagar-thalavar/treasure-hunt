@@ -52,8 +52,10 @@ with sample treasures at famous Bangalore landmarks for testing.
 
 In Supabase → **Authentication → Providers → Google**, enable it and add your Google OAuth credentials.
 
-Add `http://localhost:3000/auth/callback` to the allowed redirect URLs (and your production
-`https://yourdomain.com/auth/callback` / `.../auth/confirm` once deployed).
+In Supabase → **Authentication → URL Configuration**, set the Site URL to the
+production domain (`https://treasure.sagarthalavar.in`) and add both
+`https://treasure.sagarthalavar.in/**` and `http://localhost:3000/**` to the
+allowed Redirect URLs — production login and local-dev login respectively.
 
 ### 5. Create storage bucket
 
