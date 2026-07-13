@@ -30,7 +30,7 @@ declare
   t_radius integer;
   computed_distance double precision;
 begin
-  select latitude, longitude, radius_meters into t_lat, t_lng, t_radius
+  select treasures.latitude, treasures.longitude, treasures.radius_meters into t_lat, t_lng, t_radius
   from treasures
   where id = p_treasure_id and status = 'approved' and is_active = true;
 
