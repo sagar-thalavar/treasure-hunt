@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/supabase/auth-user";
+import { ensureProfile } from "@/lib/supabase/ensure-profile";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { redirect } from "next/navigation";
 
@@ -9,11 +10,9 @@ export default async function ProfilePage() {
 
   const supabase = createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Self-heals accounts that have no profile row yet (created before the
+  // handle_new_user trigger / backfill) instead of showing "Profile not found".
+  const profile = await ensureProfile(supabase);
 
   const { data: claims } = await supabase
     .from("claims")

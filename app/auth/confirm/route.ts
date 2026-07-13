@@ -1,6 +1,7 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { ensureProfile } from "@/lib/supabase/ensure-profile";
 
 // Handles email confirmation, password-reset, and magic-link links using
 // Supabase's token_hash + verifyOtp flow instead of the PKCE `code` flow.
@@ -35,6 +36,8 @@ export async function GET(request: NextRequest) {
     const supabase = createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
     if (!error) {
+      // Same self-heal as /auth/callback — see ensure-profile.ts.
+      await ensureProfile(supabase);
       const redirectTo = request.nextUrl.clone();
       redirectTo.pathname = next;
       redirectTo.search = "";
