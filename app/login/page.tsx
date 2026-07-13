@@ -28,6 +28,8 @@ function LoginPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [linkSent, setLinkSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     const callbackError = searchParams.get("error");
@@ -45,6 +47,30 @@ function LoginPageInner() {
     });
     if (error) setError(error.message);
     setLoading(false);
+  }
+
+  // Cross-browser-proof fallback: the emailed 6-digit code can be typed
+  // into whatever browser the user is actually on, sidestepping the PKCE
+  // same-browser requirement that breaks magic links opened in email apps'
+  // in-app browsers. (The code only appears in the email once the template
+  // includes {{ .Token }} — see README's custom-SMTP setup.)
+  async function handleVerifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    setVerifying(true);
+    setError(null);
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode.trim(),
+      type: "email",
+    });
+    if (error) {
+      setError("That code didn't work — double-check it, or request a fresh one.");
+      setVerifying(false);
+    } else {
+      // Full reload (not router.push) so the middleware sees the new
+      // session cookies on the very first request.
+      window.location.assign("/map");
+    }
   }
 
   async function handleMagicLink(e: React.FormEvent) {
@@ -126,7 +152,7 @@ function LoginPageInner() {
             {linkSent ? (
               <button
                 type="button"
-                onClick={() => { setLinkSent(false); setMessage(null); }}
+                onClick={() => { setLinkSent(false); setMessage(null); setOtpCode(""); }}
                 className="btn-secondary w-full"
               >
                 Use a different email
@@ -137,6 +163,34 @@ function LoginPageInner() {
               </button>
             )}
           </form>
+
+          {/* 6-digit code entry — works no matter which browser/app the
+              email was opened in, unlike the tap-the-link flow. */}
+          {linkSent && (
+            <form onSubmit={handleVerifyCode} className="space-y-2 pt-1">
+              <label className="label">Or enter the 6-digit code from the email</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                  className="input flex-1 tracking-[0.3em] text-center font-semibold"
+                  placeholder="123456"
+                />
+                <button
+                  type="submit"
+                  disabled={verifying || otpCode.length !== 6}
+                  className="btn-primary px-5 disabled:opacity-50"
+                >
+                  {verifying ? "…" : "Verify"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         <p className="text-center text-ink-200 text-xs mt-8">
