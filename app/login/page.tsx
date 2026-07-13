@@ -28,13 +28,19 @@ function LoginPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [linkSent, setLinkSent] = useState(false);
+  const [showOtpManual, setShowOtpManual] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     const callbackError = searchParams.get("error");
+    const details = searchParams.get("details");
     if (callbackError) {
-      setError(CALLBACK_ERROR_MESSAGES[callbackError] ?? "Something went wrong. Please try again.");
+      let msg = CALLBACK_ERROR_MESSAGES[callbackError] ?? "Something went wrong. Please try again.";
+      if (details) {
+        msg += ` (Details: ${details})`;
+      }
+      setError(msg);
     }
   }, [searchParams]);
 
@@ -157,18 +163,38 @@ function LoginPageInner() {
               >
                 Use a different email
               </button>
+            ) : showOtpManual ? (
+              <button
+                type="button"
+                onClick={() => { setShowOtpManual(false); setOtpCode(""); }}
+                className="btn-secondary w-full"
+              >
+                Request a new sign-in link
+              </button>
             ) : (
               <button type="submit" disabled={loading} className="btn-primary w-full">
                 {loading ? "Sending…" : "Send sign-in link"}
+              </button>
+            )}
+
+            {!linkSent && !showOtpManual && (
+              <button
+                type="button"
+                onClick={() => setShowOtpManual(true)}
+                className="text-xs text-ink-400 hover:text-ink-600 underline block text-center w-full mt-2"
+              >
+                Already have a 6-digit code? Enter it here
               </button>
             )}
           </form>
 
           {/* 6-digit code entry — works no matter which browser/app the
               email was opened in, unlike the tap-the-link flow. */}
-          {linkSent && (
-            <form onSubmit={handleVerifyCode} className="space-y-2 pt-1">
-              <label className="label">Or enter the 6-digit code from the email</label>
+          {(linkSent || showOtpManual) && (
+            <form onSubmit={handleVerifyCode} className="space-y-2 pt-1 border-t border-ink-100 mt-4">
+              <label className="label">
+                {linkSent ? "Or enter the 6-digit code from the email" : "Enter the 6-digit code from the email"}
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -180,10 +206,11 @@ function LoginPageInner() {
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                   className="input flex-1 tracking-[0.3em] text-center font-semibold"
                   placeholder="123456"
+                  required
                 />
                 <button
                   type="submit"
-                  disabled={verifying || otpCode.length !== 6}
+                  disabled={verifying || otpCode.length !== 6 || !email.trim()}
                   className="btn-primary px-5 disabled:opacity-50"
                 >
                   {verifying ? "…" : "Verify"}
