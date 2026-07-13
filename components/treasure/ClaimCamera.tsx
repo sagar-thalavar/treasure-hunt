@@ -104,7 +104,10 @@ export function ClaimCamera({ onPhotoReady, onCancel }: ClaimCameraProps) {
         </button>
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative">
+      {/* min-h-0 lets the preview image shrink to the space left after the
+          button bar instead of overflowing the viewport (flex min-height:auto);
+          max-w keeps the capture UI phone-shaped on desktop monitors */}
+      <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto flex items-center justify-center relative">
         {mode === "choose" && (
           <div className="w-full max-w-xs px-6 space-y-3">
             <button onClick={startCamera} className="w-full btn-primary flex items-center justify-center gap-2 py-4">
@@ -140,8 +143,8 @@ export function ClaimCamera({ onPhotoReady, onCancel }: ClaimCameraProps) {
         )}
 
         {mode === "preview" && previewUrl && (
-          <div className="w-full h-full flex flex-col">
-            <img src={previewUrl} alt="Captured" className="flex-1 w-full object-contain bg-black" />
+          <div className="w-full h-full min-h-0 flex flex-col">
+            <img src={previewUrl} alt="Captured" className="flex-1 min-h-0 w-full object-contain bg-black" />
             <div className="flex gap-3 p-4 bg-black/80">
               <button onClick={retake} className={cn("flex-1 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2",
                 "bg-white/10 text-white border border-white/20")}>
