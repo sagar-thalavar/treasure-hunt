@@ -8,13 +8,17 @@ export default async function ClaimsPage() {
 
   // Safety-net for the 48h auto-approve timeout — see
   // 006_v2_hidden_location_redesign.sql. Opportunistic, not a real cron
-  // job, which is fine for a small pilot group.
-  await supabase.rpc("auto_approve_stale_claims");
-
+  // job, which is fine for a small pilot group. Runs concurrently with the
+  // treasures lookup (it only mutates claims, which are fetched after both
+  // finish, so its effects are still visible below).
+  //
   // Two-step fetch (rather than filtering through a joined table) to keep
   // this on well-trodden query syntax: first find this creator's
   // treasures, then find pending claims against just those.
-  const { data: myTreasures } = await supabase.from("treasures").select("id").eq("creator_id", user!.id);
+  const [, { data: myTreasures }] = await Promise.all([
+    supabase.rpc("auto_approve_stale_claims"),
+    supabase.from("treasures").select("id").eq("creator_id", user!.id),
+  ]);
   const treasureIds = (myTreasures ?? []).map((t) => t.id);
 
   const claims = treasureIds.length === 0 ? [] : (
