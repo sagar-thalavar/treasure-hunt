@@ -19,9 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 24 to match the Vercel project's runtime (and the npm major
+      # that generated package-lock.json — npm 10 rejects it as out of sync).
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
