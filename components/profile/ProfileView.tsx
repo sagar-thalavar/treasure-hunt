@@ -66,9 +66,9 @@ export function ProfileView({ profile, claims, playerBadges, createdTreasures, u
           </div>
           <div className="flex items-center gap-1.5">
             {profile.role === "admin" && (
-              <Link href="/admin"
-                className="p-2 rounded-xl hover:bg-ink-50 text-ink-200 hover:text-ink-700 transition-colors border border-transparent hover:border-ink-200">
-                <Shield size={18} />
+              <Link href="/admin" title="Admin panel"
+                className="w-9 h-9 rounded-full bg-amber-400 text-ink-700 flex items-center justify-center shadow-card border border-amber-500/40 hover:scale-110 active:scale-95 transition-transform">
+                <Shield size={16} strokeWidth={2.5} />
               </Link>
             )}
             <button onClick={signOut} className="p-2 rounded-xl hover:bg-ink-50 text-ink-200 hover:text-red-400 transition-colors border border-transparent hover:border-ink-200">
