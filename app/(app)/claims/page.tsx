@@ -38,7 +38,10 @@ export default async function ClaimsPage() {
     claims.map(async (c) => {
       let signedUrl: string | null = null;
       if (c.photo_url) {
-        const { data } = await supabase.storage.from("claim-photos").createSignedUrl(c.photo_url, 60);
+        const { data, error } = await supabase.storage.from("claim-photos").createSignedUrl(c.photo_url, 60);
+        if (error) {
+          console.error(`Failed to generate signed URL for path "${c.photo_url}":`, error);
+        }
         signedUrl = data?.signedUrl ?? null;
       }
       return { ...c, signedPhotoUrl: signedUrl };
