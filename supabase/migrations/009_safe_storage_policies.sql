@@ -55,3 +55,48 @@ create policy "Finder can upload their own claim photo"
       )
     )
   );
+
+-- 4. Re-define the guard_claim_update trigger function
+-- Allows setting `photo_url` from NULL to the path.
+-- Securely restricts status changes to creators/admins only.
+create or replace function public.guard_claim_update()
+returns trigger as $$
+declare
+  treasure_creator_id uuid;
+begin
+  if is_admin() then
+    return new;
+  end if;
+
+  select creator_id into treasure_creator_id from public.treasures where id = new.treasure_id;
+
+  -- Block editing locked fields.
+  -- ONLY allow setting photo_url if it was previously NULL.
+  if (new.photo_url is distinct from old.photo_url and old.photo_url is not null)
+     or new.verified_latitude is distinct from old.verified_latitude
+     or new.verified_longitude is distinct from old.verified_longitude
+     or new.player_id is distinct from old.player_id
+     or new.treasure_id is distinct from old.treasure_id then
+    raise exception 'You cannot modify these fields.';
+  end if;
+
+  -- Restrict status change to creators only
+  if new.status is distinct from old.status then
+    if auth.uid() is distinct from treasure_creator_id then
+      raise exception 'Only the creator can approve or reject claims.';
+    end if;
+    if not (old.status = 'pending' and new.status in ('approved', 'rejected')) then
+      raise exception 'Invalid status transition.';
+    end if;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer;
+
+-- 5. Add update policy for players on public.claims
+drop policy if exists "Players can update their own pending claims" on public.claims;
+create policy "Players can update their own pending claims"
+  on public.claims for update
+  using (auth.uid() = player_id and status = 'pending')
+  with check (auth.uid() = player_id and status = 'pending');

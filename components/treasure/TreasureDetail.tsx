@@ -124,7 +124,8 @@ export function TreasureDetail({ treasure, userId, isCreator, existingClaim }: P
       if (upErr) throw upErr;
 
       // 3. Attach the photo path to the claim.
-      await supabase.from("claims").update({ photo_url: path }).eq("id", claimRow.id);
+      const { error: updateErr } = await supabase.from("claims").update({ photo_url: path }).eq("id", claimRow.id);
+      if (updateErr) throw updateErr;
 
       setClaimState(claimRow as ExistingClaim);
     } catch (err: unknown) {
