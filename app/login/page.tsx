@@ -183,34 +183,34 @@ function LoginPageInner() {
                 onClick={() => setShowOtpManual(true)}
                 className="text-xs text-ink-400 hover:text-ink-600 underline block text-center w-full mt-2"
               >
-                Already have a 6-digit code? Enter it here
+                Already have a code? Enter it here
               </button>
             )}
           </form>
 
-          {/* 6-digit code entry — works no matter which browser/app the
-              email was opened in, unlike the tap-the-link flow. */}
+          {/* Code entry — works no matter which browser/app the
+              email was opened in, unlike the tap-the-link flow. Supports 6-8 digit OTPs. */}
           {(linkSent || showOtpManual) && (
             <form onSubmit={handleVerifyCode} className="space-y-2 pt-1 border-t border-ink-100 mt-4">
               <label className="label">
-                {linkSent ? "Or enter the 6-digit code from the email" : "Enter the 6-digit code from the email"}
+                {linkSent ? "Or enter the code from the email" : "Enter the code from the email"}
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  pattern="[0-9]{6}"
-                  maxLength={6}
+                  pattern="[0-9]{4,8}"
+                  maxLength={8}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                   className="input flex-1 tracking-[0.3em] text-center font-semibold"
-                  placeholder="123456"
+                  placeholder="1234"
                   required
                 />
                 <button
                   type="submit"
-                  disabled={verifying || otpCode.length !== 6 || !email.trim()}
+                  disabled={verifying || otpCode.length < 4 || otpCode.length > 8 || !email.trim()}
                   className="btn-primary px-5 disabled:opacity-50"
                 >
                   {verifying ? "…" : "Verify"}
