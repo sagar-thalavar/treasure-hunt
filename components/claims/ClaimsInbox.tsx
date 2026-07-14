@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, Coins, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -21,6 +22,7 @@ interface ClaimRow {
 export function ClaimsInbox({ claims }: { claims: ClaimRow[] }) {
   const router = useRouter();
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -32,7 +34,10 @@ export function ClaimsInbox({ claims }: { claims: ClaimRow[] }) {
     setError(null);
     const { error } = await supabase.from("claims").update({ status: "approved" }).eq("id", claimId);
     if (error) setError(error.message);
-    else router.refresh();
+    else {
+      queryClient.invalidateQueries({ queryKey: ["pending-claims-count"] });
+      router.refresh();
+    }
     setBusyId(null);
   }
 
@@ -49,6 +54,7 @@ export function ClaimsInbox({ claims }: { claims: ClaimRow[] }) {
       .eq("id", claimId);
     if (error) setError(error.message);
     else {
+      queryClient.invalidateQueries({ queryKey: ["pending-claims-count"] });
       setRejectingId(null);
       setReason("");
       router.refresh();
