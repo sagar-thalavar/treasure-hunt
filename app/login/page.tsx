@@ -158,7 +158,7 @@ function LoginPageInner() {
             {linkSent ? (
               <button
                 type="button"
-                onClick={() => { setLinkSent(false); setMessage(null); setOtpCode(""); }}
+                onClick={(e) => { e.preventDefault(); setLinkSent(false); setMessage(null); setOtpCode(""); }}
                 className="btn-secondary w-full"
               >
                 Use a different email
@@ -166,7 +166,7 @@ function LoginPageInner() {
             ) : showOtpManual ? (
               <button
                 type="button"
-                onClick={() => { setShowOtpManual(false); setOtpCode(""); }}
+                onClick={(e) => { e.preventDefault(); setShowOtpManual(false); setOtpCode(""); }}
                 className="btn-secondary w-full"
               >
                 Request a new sign-in link
@@ -180,7 +180,7 @@ function LoginPageInner() {
             {!linkSent && !showOtpManual && (
               <button
                 type="button"
-                onClick={() => setShowOtpManual(true)}
+                onClick={(e) => { e.preventDefault(); setShowOtpManual(true); }}
                 className="text-xs text-ink-400 hover:text-ink-600 underline block text-center w-full mt-2"
               >
                 Already have a 6-digit code? Enter it here
