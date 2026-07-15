@@ -8,6 +8,7 @@ import type { Treasure } from "@/lib/types";
 import { Coins, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 
 type SortOrder = "newest" | "points_high" | "points_low";
 
@@ -110,7 +111,8 @@ export function FeedView() {
                 className="block card overflow-hidden hover:border-ink-400 transition-all duration-150">
                 <div className="relative aspect-square bg-ink-50">
                   {t.image_url ? (
-                    <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
+                    <Image src={t.image_url} alt={t.title} fill sizes="(max-width: 512px) 100vw, 512px"
+                      className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl">💎</div>
                   )}

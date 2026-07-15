@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { formatDistance, cn } from "@/lib/utils";
 import { ChevronLeft, CheckCircle2, Lock, Coins, Clock, Users, AlertCircle, Loader2, Camera } from "lucide-react";
@@ -145,7 +146,8 @@ export function TreasureDetail({ treasure, userId, isCreator, existingClaim }: P
       {/* Clue photo — this is the only visual clue, no map, no coordinates */}
       <div className="h-64 relative bg-ink-200">
         {treasure.image_url ? (
-          <img src={treasure.image_url} alt={treasure.title} className="w-full h-full object-cover" />
+          <Image src={treasure.image_url} alt={treasure.title} fill sizes="(max-width: 512px) 100vw, 512px"
+            priority className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-5xl">💎</div>
         )}
