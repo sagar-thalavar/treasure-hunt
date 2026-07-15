@@ -112,7 +112,7 @@ export function FeedView() {
                 <div className="relative aspect-square bg-ink-50">
                   {t.image_url ? (
                     <Image src={t.image_url} alt={t.title} fill sizes="(max-width: 512px) 100vw, 512px"
-                      className="object-cover" />
+                      className="object-contain" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-4xl">💎</div>
                   )}
